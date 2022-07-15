@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import multiprocess as mp
@@ -15,9 +16,11 @@ plot_p0 = False
 plot_chains = False
 plot_corner = False
 plot_ppc = False
+data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
+output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.h5')
 
 # Load Observed Data
-eri_ii = pd.read_csv('../../Data/Eri_II/EriII_MDF.dat', index_col=0)
+eri_ii = pd.read_csv(data_file, index_col=0)
 obs_bins = np.linspace(-10, 2.0, 25)
 counts, obs_bins = np.histogram(eri_ii['FeH'], bins=obs_bins, density=False)
 eri_ii_mdf = {
@@ -78,7 +81,7 @@ if plot_p0:
 
 # Run MCMC Sampling
 pool = mp.Pool(mp.cpu_count())
-backend = emcee.backends.HDFBackend("./EriII_samples.h5", name=f"SFE_SFH_eta_0.50bins")
+backend = emcee.backends.HDFBackend(output_file, name=f"SFE_SFH_eta_0.50bins")
 backend.reset(nwalkers, ndim)
 sampler = emcee.EnsembleSampler(
     nwalkers, ndim, log_probability,

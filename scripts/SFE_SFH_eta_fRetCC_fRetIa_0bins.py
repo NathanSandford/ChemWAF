@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import multiprocess as mp
@@ -16,7 +17,18 @@ plot_p0 = False
 plot_pocomc = False
 plot_corner = False
 plot_ppc = False
+data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
+output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/SFE_SFH_eta_fRetCC_fRetIa_0bins.npz')
 
+# Load Observed Data
+eri_ii = pd.read_csv(data_file, index_col=0)
+obs_bins = np.linspace(-10, 2.0, 49)
+counts, obs_bins = np.histogram(eri_ii['FeH'], bins=obs_bins, density=False)
+eri_ii_mdf = {
+    'counts': counts,
+    'bins': obs_bins,
+}
+n_obj = eri_ii.shape[0]
 # Load Default Parameters
 par = DefaultParSet()
 par.t = np.arange(0.0001, 1.0001, 0.0001)
@@ -127,7 +139,7 @@ with mp.Pool(mp.cpu_count()) as pool:
     sampler.add_samples(9000)
 # Save Results
 results = sampler.results
-np.savez('./SFE_SFH_eta_MDF.npz', **results)
+np.savez(output_file, **results)
 
 if plot_pocomc:
     # Plot Run Diagnostics & Trace
