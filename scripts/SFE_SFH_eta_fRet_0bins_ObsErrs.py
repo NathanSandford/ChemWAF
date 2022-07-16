@@ -5,7 +5,10 @@ import multiprocess as mp
 import pocomc as pc
 from waf.par import DefaultParSet
 from waf.fitting.priors import UniformLogPrior, GaussianLogPrior
-from waf.fitting.emcee import log_probability, ppc
+from waf.fitting.pocomc import log_prior_0bins as log_prior
+from waf.fitting.pocomc import log_likelihood_0bins as log_likelihood
+from waf.fitting.pocomc import log_probability_0bins as log_probability
+from waf.fitting.pocomc import ppc
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from corner import corner
@@ -13,12 +16,12 @@ np.seterr(all="ignore");
 
 nwalkers = 5000
 use_obs_errs = True
-plot_p0 = False
-plot_pocomc = False
-plot_corner = False
-plot_ppc = False
+plot_p0 = True
+plot_pocomc = True
+plot_corner = True
+plot_ppc = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
-output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/SFE_SFH_eta_fRet_0bins_ObsErrs.npz')
+output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/SFE_SFH_eta_fRet_0bins.npz')
 
 # Load Observed Data
 eri_ii = pd.read_csv(data_file, index_col=0)
@@ -71,7 +74,7 @@ while len(p0_list) < nwalkers:
             par,
             priors,
             gal_par_names,
-            bins,
+            mod_bins,
             obs=None if use_obs_errs else eri_ii,
         )
     ):
@@ -81,7 +84,7 @@ nwalkers, ndim = p0.shape
 if plot_p0:
     # Plot Observed MDF & MDF of Initial Walkers
     p0_dict_list = [{par_name: p0[i,j] for j, par_name in enumerate(gal_par_names)} for i in range(nwalkers)]
-    SFR, OH, FeH, OFe, OH_MDF, FeH_MDF, OFe_MDF, OH_PDF, FeH_PDF, OFe_PDF = ppc(p0_dict_list, par, bins, eri_ii_mdf)
+    SFR, OH, FeH, OFe, OH_MDF, FeH_MDF, OFe_MDF, OH_PDF, FeH_PDF, OFe_PDF = ppc(p0_dict_list, par, mod_bins, eri_ii_mdf)
     plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     ax.stairs(eri_ii_mdf['counts'], eri_ii_mdf['bins'], color='k', lw=3, label='Fu+ 2022')
@@ -118,7 +121,7 @@ with mp.Pool(mp.cpu_count()) as pool:
         log_likelihood_kwargs=dict(
             default_par=par,
             gal_par_names=gal_par_names,
-            bins=bins,
+            bins=mod_bins,
             obs=None if use_obs_errs else eri_ii,
         ),
         log_prior=log_prior,
@@ -170,10 +173,25 @@ if plot_corner:
         if i == 0:
             ax.legend(fontsize=24)
     plt.show()
+    if use_obs_errs:
+        # Latent [Fe/H] Posteriors
+        prior_vals = np.exp(priors['latent_FeH'](bins[:, np.newaxis]))
+        for i in range(n_obj):
+            plt.figure(figsize=(8,2))
+            plt.hist(
+                flat_samples[:, len(gal_par_names)+i], bins=bins,
+                histtype='step', density=True, color='k', label=f'star_{i+1:02.0f} posterior'
+            )
+            plt.plot(bins, prior_vals[:, i], color='g', label='prior')
+            plt.xlim(-4,-1)
+            plt.xlabel('[Fe/H]')
+            plt.ylabel('Probability')
+            plt.legend()
+            plt.show()
 if plot_ppc:
     flat_samples = results['samples']
     ppc_samples_dict = [{par_name: flat_samples[i,j] for j, par_name in enumerate(gal_par_names)} for i in range(flat_samples.shape[0])]
-    SFR, OH, FeH, OFe, OH_MDF, FeH_MDF, OFe_MDF, OH_PDF, FeH_PDF, OFe_PDF = ppc(ppc_samples_dict, par, obs_bins, eri_ii_mdf)
+    SFR, OH, FeH, OFe, OH_MDF, FeH_MDF, OFe_MDF, OH_PDF, FeH_PDF, OFe_PDF = ppc(ppc_samples_dict, par, mod_bins, eri_ii_mdf)
     # Plot Observed MDF & MDF of Initial Walkers
     plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
