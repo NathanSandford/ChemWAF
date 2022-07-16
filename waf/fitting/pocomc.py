@@ -62,8 +62,8 @@ def log_likelihood_0bins(p, default_par, gal_par_names, bins, obs=None):
 
 
 def log_probability_0bins(p, default_par, priors, gal_par_names, bins, obs=None):
-    logPi = log_prior(p, priors, gal_par_names, obs)
-    logL = log_likelihood(p, default_par, gal_par_names, bins, obs)
+    logPi = log_prior_0bins(p, priors, gal_par_names, obs)
+    logL = log_likelihood_0bins(p, default_par, gal_par_names, bins, obs)
     logP = logPi + logL
     if np.isnan(logP):
         return -np.inf
