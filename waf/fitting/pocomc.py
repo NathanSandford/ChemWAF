@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import poisson
 from waf.models import waf2017
 from waf.utils import get_MDF, get_PDF, eval_PDF
 
