@@ -21,7 +21,7 @@ plot_pocomc = True
 plot_corner = True
 plot_ppc = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
-output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/SFE_SFH_eta_0.50bins.npz')
+output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/SFE_SFH_eta_0.50bins.npz')
 
 # Load Observed Data
 eri_ii = pd.read_csv(data_file, index_col=0)
