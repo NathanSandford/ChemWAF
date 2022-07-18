@@ -34,7 +34,7 @@ eri_ii_mdf = {
 n_obj = eri_ii.shape[0]
 # Load Default Parameters
 par = DefaultParSet()
-par.t = np.arange(0.0001, 1.001, 0.001)
+par.t = np.arange(0.001, 1.001, 0.001)
 mod_bins = np.linspace(-10, 2.0, 500)
 # Define Priors
 gal_priors = dict(

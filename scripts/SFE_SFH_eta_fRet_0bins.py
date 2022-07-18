@@ -41,7 +41,7 @@ gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.2, 0, 1e2),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
-    fRet=GaussianLogPrior('fRet', 1.0, 0.3, 0, 1),
+    fRet=UniformLogPrior('fRet', 0, 1, -np.inf),  # GaussianLogPrior('fRet', 1, 0.3, 0, 1),
 )
 gal_par_names = list(gal_priors.keys())
 bounds = np.array([
