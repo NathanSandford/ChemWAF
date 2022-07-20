@@ -21,7 +21,7 @@ def plot_corner(samples, par_names, priors=None):
         for ax in fig.get_axes():
             ax.tick_params(axis='both', labelsize=18)
             axes = np.array(fig.axes).reshape((len(par_names), len(par_names)))
-        for i, label in enumerate(gal_par_names):
+        for i, label in enumerate(par_names):
             ax = axes[i, i]
             x = np.linspace(0.75*samples[:, i].min(), 1.25*samples[:, i].max(), 10000)
             ax.plot(x, np.exp(priors[label](x)), color="g", label='prior' if i == 0 else '')
@@ -60,7 +60,7 @@ def plot_latentFeH(samples, latentFeH_priors, mod_bins, n_gal_par, n_obj):
     return fig
 
 
-def plot_FeH_MDF(samples, gal_par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
+def plot_FeH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     ax.scatter(obs['FeH'], np.ones_like(obs['FeH']), marker='|', c='k', s=100)
@@ -69,7 +69,7 @@ def plot_FeH_MDF(samples, gal_par_names, obs, obs_mdf, mod_mdf, use_obs_errs=Fal
     if use_obs_errs:
         ppc_FeH_MDF = np.zeros((samples.shape[0], obs_mdf['bins'].shape[0] - 1))
         for i in range(samples.shape[0]):
-            ppc_FeH_MDF[i], _ = np.histogram(samples[i, len(gal_par_names):], bins=obs_mdf['bins'], density=False)
+            ppc_FeH_MDF[i], _ = np.histogram(samples[i, len(par_names):], bins=obs_mdf['bins'], density=False)
         ax.stairs(obs_mdf['counts'], obs_mdf['bins'], color='k', lw=3, ls='--', label='Fu+ 2022')
         ax.stairs(
             np.percentile(ppc_FeH_MDF, 50, axis=0),
@@ -106,7 +106,7 @@ def plot_FeH_MDF(samples, gal_par_names, obs, obs_mdf, mod_mdf, use_obs_errs=Fal
     return fig
 
 
-def plot_OH_MDF(samples, gal_par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
+def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     try:
@@ -120,7 +120,7 @@ def plot_OH_MDF(samples, gal_par_names, obs, obs_mdf, mod_mdf, use_obs_errs=Fals
     if use_obs_errs:
         ppc_OH_MDF = np.zeros((samples.shape[0], obs_mdf['bins'].shape[0] - 1))
         for i in range(samples.shape[0]):
-            ppc_OH_MDF[i], _ = np.histogram(samples[i, len(gal_par_names):], bins=obs_mdf['bins'], density=False)
+            ppc_OH_MDF[i], _ = np.histogram(samples[i, len(par_names):], bins=obs_mdf['bins'], density=False)
         if obs_o_mdf:
             ax.stairs(obs_mdf['counts'], obs_mdf['bins'], color='k', lw=3, ls='--', label='Fu+ 2022')
         ax.stairs(
