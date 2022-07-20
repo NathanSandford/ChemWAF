@@ -31,7 +31,7 @@ def plot_corner(samples, par_names, priors=None):
 
 
 def plot_latentFeH(samples, latentFeH_priors, mod_bins, n_gal_par, n_obj):
-    prior_vals = np.exp(priors['latent_FeH'](mod_bins[:, np.newaxis]))
+    prior_vals = np.exp(latentFeH_priors(mod_bins[:, np.newaxis]))
     n_col = 3
     n_row = n_obj // n_col + (n_obj % n_col > 0)
     fig = plt.figure(figsize=(8*n_col,1*n_obj))
