@@ -186,7 +186,7 @@ def plot_tinsley(FeH, OFe, mod_bins):
     OFe_interp = np.zeros((n_samples, mod_bins.shape[0]))
     for i in range(n_samples):
         OFe_interp[i] = np.interp(mod_bins, FeH[i], OFe[i], left=np.nan, right=np.nan)
-    plt.figure(figsize=(16,8))
+    fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     ax.plot(mod_bins, np.percentile(OFe_interp, 50, axis=0), color='r', lw=3)
     ax.fill_between(
