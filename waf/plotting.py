@@ -181,7 +181,7 @@ def plot_evolution(t, FeH, OH, OFe, SFR):
     return fig
 
 
-def plot_tinsley(FeH, OH, mod_bins):
+def plot_tinsley(FeH, OFe, mod_bins):
     n_samples = FeH.shape[0]
     OFe_interp = np.zeros((n_samples, mod_bins.shape[0]))
     for i in range(n_samples):
