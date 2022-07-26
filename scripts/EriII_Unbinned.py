@@ -57,8 +57,6 @@ while len(p0_list) < nwalkers:
         0.5 + 2e-1 * np.random.randn(),  # fRetCC
         0.5 + 2e-1 * np.random.randn(),  # fRetIa
     ])
-    if fit_latent_FeH:
-        p = np.concatenate([p, [obs['FeH'][i] + obs['dFeH'][i] * np.random.randn() for i in range(n_star)]])
     if np.isfinite(
         log_probability(
             p,
