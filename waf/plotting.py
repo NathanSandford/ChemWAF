@@ -60,13 +60,13 @@ def plot_latentFeH(samples, latentFeH_priors, mod_bins, n_gal_par, n_obj):
     return fig
 
 
-def plot_FeH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
+def plot_FeH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_FeH=False):
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     ax.scatter(obs['FeH'], np.ones_like(obs['FeH']), marker='|', c='k', s=100)
     ax.errorbar(0, 1, xerr=np.median(obs['dFeH']), fmt='ok', capsize=10)
     ax.text(0, 1.75, 'Median Error', fontsize=24, ha='center')
-    if use_obs_errs:
+    if include_latent_FeH:
         ppc_FeH_MDF = np.zeros((samples.shape[0], obs_mdf['bins'].shape[0] - 1))
         for i in range(samples.shape[0]):
             ppc_FeH_MDF[i], _ = np.histogram(samples[i, len(par_names):], bins=obs_mdf['bins'], density=False)
@@ -106,7 +106,7 @@ def plot_FeH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
     return fig
 
 
-def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
+def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_FeH=False):
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     try:
@@ -117,7 +117,7 @@ def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, use_obs_errs=False):
     except KeyError:
         obs_o_mdf = False
         pass
-    if use_obs_errs:
+    if include_latent_FeH:
         ppc_OH_MDF = np.zeros((samples.shape[0], obs_mdf['bins'].shape[0] - 1))
         for i in range(samples.shape[0]):
             ppc_OH_MDF[i], _ = np.histogram(samples[i, len(par_names):], bins=obs_mdf['bins'], density=False)
