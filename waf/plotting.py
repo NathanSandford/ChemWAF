@@ -106,7 +106,7 @@ def plot_FeH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_FeH=F
     return fig
 
 
-def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_FeH=False):
+def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_OH=False):
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
     try:
