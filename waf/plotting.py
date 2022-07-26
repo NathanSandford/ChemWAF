@@ -5,11 +5,11 @@ from matplotlib.gridspec import GridSpec
 from corner import corner
 
 
-def plot_corner(samples, par_names, priors=None):
+def plot_corner(samples, par_names, display_par_names, priors=None):
     fig = plt.figure(figsize=(15,15))
     fig = corner(
         samples[:, :len(par_names)],
-        labels=par_names,
+        labels=display_par_names,
         quantiles=(0.16, 0.5, 0.84),
         fig=fig,
         show_titles=True,
