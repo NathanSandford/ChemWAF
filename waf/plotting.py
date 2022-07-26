@@ -131,7 +131,7 @@ def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_FeH=Fa
         ax.stairs(
             np.percentile(ppc_OH_MDF, 97.5, axis=0),
             obs_mdf['bins'],
-            baseline=np.percentile(ppc_FeH_MDF, 2.5, axis=0),
+            baseline=np.percentile(ppc_OH_MDF, 2.5, axis=0),
             fill=True, alpha=0.2, color='k', label='95% CI',
         )
     else:
@@ -181,7 +181,7 @@ def plot_evolution(t, FeH, OH, OFe, SFR):
     return fig
 
 
-def plot_tinsley(FeH, OFe, mod_bins):
+def plot_tinsley(FeH, OFe):
     n_samples = FeH.shape[0]
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
