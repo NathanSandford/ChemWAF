@@ -1,38 +1,44 @@
 import numpy as np
 from waf.models import waf2017
-from waf.utils import get_MDF, get_PDF, eval_PDF
+from waf.utils import get_MDF, get_PDF
+from scipy.stats import poisson
 
-
-def log_prior(p, priors, gal_par_names, obs=None):
+def log_prior(p, priors, gal_par_names):
     if p.ndim > 1:
         raise AttributeError('log_prior is not vectorized')
     p_gal = p[:len(gal_par_names)]
     logPi = np.sum([priors[gal_par_names[i]](p_gal[i]) for i in range(len(gal_par_names))])
-    if obs is None:
-        p_star = p[len(gal_par_names):]
-        logPi += np.sum(priors['latent_FeH'](p_star))
     return logPi
 
 
-def log_likelihood(p, default_par, gal_par_names, bins, obs=None):
+def log_likelihood(p, default_par, gal_par_names, obs):
     if p.ndim > 1:
         raise AttributeError('log_likelihood is not vectorized')
     p_gal = p[:len(gal_par_names)]
     p_gal_dict = {par_name: p_gal[i] for i, par_name in enumerate(gal_par_names)}
     default_par.update(p_gal_dict)
     SFR, OH, FeH, OFe = waf2017(**default_par.__dict__)
-    FeH_PDF = get_PDF(FeH, SFR, bins)
-    if obs is None:
-        p_star = p[len(gal_par_names):]
-    else:
-        p_star = obs['FeH'].values
-    logL = eval_PDF(p_star, FeH_PDF, bins)
+    FeH_PDF = SFR[1:] / np.diff(FeH) + 1e-10
+    FeH_PDF /= np.trapz(FeH_PDF, FeH[1:])
+    logL = np.sum(
+        np.log(
+        np.trapz(
+                FeH_PDF/(np.sqrt(2*np.pi)*obs['dFeH'].values)[:, np.newaxis] \
+                    * np.exp(
+                        -(FeH[np.newaxis, 1:] - obs['FeH'].values[:, np.newaxis])**2 \
+                        / (2*obs['dFeH'].values[:, np.newaxis]**2)
+                    ),
+                FeH[1:],
+                axis=1,
+            )
+        )
+    )
     return logL
 
 
-def log_probability(p, default_par, priors, gal_par_names, bins, obs=None):
-    logPi = log_prior(p, priors, gal_par_names, obs)
-    logL = log_likelihood(p, default_par, gal_par_names, bins, obs)
+def log_probability(p, default_par, priors, gal_par_names, obs):
+    logPi = log_prior(p, priors, gal_par_names)
+    logL = log_likelihood(p, default_par, gal_par_names, obs)
     logP = logPi + logL
     if np.isnan(logP):
         return -np.inf

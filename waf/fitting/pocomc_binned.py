@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import poisson
 from waf.models import waf2017
-from waf.utils import get_MDF
+from waf.utils import get_MDF, get_PDF
 
 
 def log_prior(p, priors, gal_par_names):
@@ -12,21 +12,21 @@ def log_prior(p, priors, gal_par_names):
     return logPi
 
 
-def log_likelihood(p, default_par, gal_par_names, obs):
+def log_likelihood(p, default_par, gal_par_names, obs_mdf):
     if p.ndim > 1:
         raise AttributeError('log_likelihood is not vectorized')
     p_gal = p[:len(gal_par_names)]
     p_gal_dict = {par_name: p_gal[i] for i, par_name in enumerate(gal_par_names)}
     default_par.update(p_gal_dict)
     SFR, OH, FeH, OFe = waf2017(**default_par.__dict__)
-    FeH_MDF = get_MDF(FeH, SFR, obs['bins']) * obs['counts'].sum()
-    logL = poisson.logpmf(obs['counts'], FeH_MDF).sum()
+    FeH_MDF = get_MDF(FeH, SFR, obs_mdf['bins']) * obs_mdf['counts'].sum()
+    logL = poisson.logpmf(obs_mdf['counts'], FeH_MDF).sum()
     return logL
 
 
-def log_probability(p, default_par, priors, gal_par_names, obs):
+def log_probability(p, default_par, priors, gal_par_names, obs_mdf):
     logPi = log_prior(p, priors, gal_par_names)
-    logL = log_likelihood(p, default_par, gal_par_names, obs)
+    logL = log_likelihood(p, default_par, gal_par_names, obs_mdf)
     logP = logPi + logL
     if np.isnan(logP):
         return -np.inf

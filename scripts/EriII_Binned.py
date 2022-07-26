@@ -30,7 +30,6 @@ n_star = obs.shape[0]
 # Load Default Parameters
 par = DefaultParSet()
 par.t = np.arange(0.0001, 1.0001, 0.0001)
-mod_bins = np.linspace(-10, 2.0, 501)
 # Define Priors
 priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
@@ -63,10 +62,10 @@ while len(p0_list) < nwalkers:
     if np.isfinite(
         log_probability(
             p,
-            par,
-            priors,
-            gal_par_names,
-            obs=obs_mdf,
+            default_par=par,
+            priors=priors,
+            gal_par_names=gal_par_names,
+            obs_mdf=obs_mdf,
         )
     ):
         p0_list.append(p)
@@ -82,7 +81,7 @@ with mp.Pool(mp.cpu_count()) as pool:
         log_likelihood_kwargs=dict(
             default_par=par,
             gal_par_names=gal_par_names,
-            obs=obs_mdf,
+            obs_mdf=obs_mdf,
         ),
         log_prior=log_prior,
         log_prior_kwargs=dict(
