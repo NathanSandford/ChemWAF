@@ -183,17 +183,10 @@ def plot_evolution(t, FeH, OH, OFe, SFR):
 
 def plot_tinsley(FeH, OFe, mod_bins):
     n_samples = FeH.shape[0]
-    OFe_interp = np.zeros((n_samples, mod_bins.shape[0]))
-    for i in range(n_samples):
-        OFe_interp[i] = np.interp(mod_bins, FeH[i], OFe[i], left=np.nan, right=np.nan)
     fig = plt.figure(figsize=(16,8))
     ax = plt.subplot(111)
-    ax.plot(mod_bins, np.percentile(OFe_interp, 50, axis=0), color='r', lw=3)
-    ax.fill_between(
-        mod_bins[mod_bins < np.percentile(FeH.max(axis=1), 97.5)],
-        np.nanpercentile(OFe_interp, 2.5, axis=0)[mod_bins < np.percentile(FeH.max(axis=1), 97.5)],
-        np.nanpercentile(OFe_interp, 97.5, axis=0)[mod_bins < np.percentile(FeH.max(axis=1), 97.5)],
-        alpha=0.2, color='r',)
+    for i in range(n_samples):
+        ax.plot(FeH[i, 10::], OFe[i, 10::], lw=0.5, alpha=0.05, c='r')
     ax.set_ylabel('[O/Fe]', fontsize=36)
     ax.set_xlabel('[Fe/H]', fontsize=36)
     ax.set_xlim(-4.0, -1.0)
