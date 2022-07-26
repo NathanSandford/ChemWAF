@@ -38,7 +38,7 @@ priors = dict(
     fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
     fRetIa=UniformLogPrior('fRetIa', 0, 1, -np.inf),
 )
-gal_par_names = list(gal_priors.keys())
+gal_par_names = list(priors.keys())
 bounds = np.array([
     [1e-2, 4],  # logtauSFE
     [1e-2, 1e2],  # tauSFH
