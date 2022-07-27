@@ -117,7 +117,7 @@ def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_OH=Fal
     except KeyError:
         obs_o_mdf = False
         pass
-    if include_latent_FeH:
+    if include_latent_OH:
         ppc_OH_MDF = np.zeros((samples.shape[0], obs_mdf['bins'].shape[0] - 1))
         for i in range(samples.shape[0]):
             ppc_OH_MDF[i], _ = np.histogram(samples[i, len(par_names):], bins=obs_mdf['bins'], density=False)
@@ -126,7 +126,7 @@ def plot_OH_MDF(samples, par_names, obs, obs_mdf, mod_mdf, include_latent_OH=Fal
         ax.stairs(
             np.percentile(ppc_OH_MDF, 50, axis=0),
             obs_mdf['bins'],
-            color='k', lw=3, label='Latent [Fe/H]',
+            color='k', lw=3, label='Latent [O/H]',
         )
         ax.stairs(
             np.percentile(ppc_OH_MDF, 97.5, axis=0),
@@ -173,10 +173,12 @@ def plot_evolution(t, FeH, OH, OFe, SFR):
     ax2.fill_between(t, np.percentile(SFR, 2.5, axis=0), np.percentile(SFR, 97.5, axis=0), alpha=0.2, color='grey',)
     ax1.legend(fontsize=24, loc='upper left')
     ax2.legend(fontsize=24, loc='lower left')
-    ax1.set_xlabel('[X/Y]', fontsize=36)
+    ax1.set_xlabel('t [Gyr]', fontsize=36)
+    ax1.set_ylabel('[X/Y]', fontsize=36)
     ax2.set_ylabel(r'dSFR/dt', fontsize=36)
     ax1.tick_params('x', labelsize=24)
     ax1.tick_params('y', labelsize=24)
+    ax2.tick_params('y', labelsize=24)
     plt.tight_layout()
     return fig
 
