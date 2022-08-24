@@ -137,6 +137,12 @@ while len(p0_list) < nwalkers:
             )[0] for i in range(priors['latent_FeH'].n)
         ]
     )
+    logP = log_probability(
+        p,
+        default_par=par,
+        priors=priors,
+        gal_par_names=gal_par_names,
+    )
     if logP > p0_min_logP:
         p0_list.append(p)
         pbar.update(1)
