@@ -53,6 +53,7 @@ samples = pd.read_csv(samp_file, index_col=0)
 
 # Load Default Parameters
 par = DefaultParSet()
+par.update({'IaDTD_fn': 'powerlaw'})  # -1.1 Powerlaw DTD
 par.t = np.arange(dt, t_trunc+dt, dt)
 fine_bins = np.linspace(-10, 2.0, 1201)  # d[Fe/H] = 0.01 dex
 
