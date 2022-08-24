@@ -61,13 +61,13 @@ def waf2017(
         if tdminIa == 0.05:
             tauIa1 = 0.25
             tauIa2 = 3.5
-            norm1 = 0.493
-            norm2 = 0.507
+            Ia_norm1 = 0.493
+            Ia_norm2 = 0.507
         elif tdminIa == 0.15:
             tauIa1 = 0.5
             tauIa2 = 5.0
-            norm1 = 0.478
-            norm2 = 0.522
+            Ia_norm1 = 0.478
+            Ia_norm2 = 0.522
         else:
             RuntimeError("tdminIa must be either 0.05 or 0.15 if IaDTD_fn == 'powerlaw' ")
     else:
