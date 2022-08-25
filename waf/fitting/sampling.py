@@ -11,7 +11,7 @@ def log_prior(p_gal, p_star, priors):
 def log_likelihood(p_gal, p_star, default_par, gal_par_names):
     default_par.update(p_gal)
     SFR, OH, FeH, OFe = waf2017(**default_par.__dict__)
-    if np.any(np.isnan(OH)) or np.any(np.isnan(FeH)) or np.any(np.isnan(OFe)):
+    if ~np.all(np.isfinite(OH)) or ~np.all(np.isfinite(FeH)) or ~np.all(np.isfinite(OFe)):
         return -np.inf
     FeH_PDF, grid = get_PDF(
         FeH,
