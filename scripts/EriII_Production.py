@@ -9,7 +9,7 @@ import multiprocess as mp
 import pocomc as pc
 from waf.par import DefaultParSet
 from waf.fitting.priors import UniformLogPrior, GaussianLogPrior, KDELogPrior
-from waf.fitting.sampling import log_likelihood, log_prior
+from waf.fitting.sampling import log_probability, log_likelihood, log_prior
 from waf.utils import randdist
 import matplotlib as mpl
 import matplotlib.pyplot as plt
