@@ -8,7 +8,7 @@ def log_prior(p_gal, p_star, priors):
     return logPi
 
 
-def log_likelihood(p_gal, p_star, default_par, gal_par_names):
+def log_likelihood(p_gal, p_star, default_par, gal_par_names, floor=1e-10):
     default_par.update(p_gal)
     SFR, OH, FeH, OFe = waf2017(**default_par.__dict__)
     if ~np.all(np.isfinite(OH)) or ~np.all(np.isfinite(FeH)) or ~np.all(np.isfinite(OFe)):
@@ -21,7 +21,7 @@ def log_likelihood(p_gal, p_star, default_par, gal_par_names):
         upper_bound=None,
         boundary_dist='HalfNormal',
         boundary_width=0.35,
-        floor=0,
+        floor=floor,
     )
     logL = np.sum(np.log(np.interp(p_star, grid, FeH_PDF, left=0, right=0)))
     if np.isnan(logL):
