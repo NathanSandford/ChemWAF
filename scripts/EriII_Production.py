@@ -21,10 +21,15 @@ nwalkers = 5000
 dt = 0.001  # Gyr
 t_trunc = 1.0  # Gyr
 p0_min_logP = -100  # -np.inf
+reload_p0 = True  # Use previous p0 if it exists, skipping the costly initialization
+# (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
+output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII.npz')
+p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
+
 
 # Matplotlib defaults
 mpl.rc('axes', grid=True, lw=2)
@@ -126,32 +131,36 @@ if plotting:
     plt.show()
 
 # Initialize Walkers
-p0_list = []
-pbar = tqdm(total=nwalkers)
-while len(p0_list) < nwalkers:
-    p = np.array(
-        [
-            priors[key].dist.rvs() for key in gal_par_names
-        ] + [
-            #priors['latent_FeH'].dist[0].rvs() for i in range(CaHK_FeH_Priors.n)
-            randdist(
-                priors['latent_FeH'].xsmooth,
-                priors['latent_FeH'].smoothed_pdf[i],
-                nvals=1,
-            )[0] for i in range(priors['latent_FeH'].n)
-        ]
-    )
-    logP = log_probability(
-        p,
-        default_par=par,
-        priors=priors,
-        gal_par_names=gal_par_names,
-    )
-    if logP > p0_min_logP:
-        p0_list.append(p)
-        pbar.update(1)
-pbar.close()
-p0 = np.vstack(p0_list)
+if reload_p0 and p0_file.exists():
+    p0 = np.load(p0_file)
+else:
+    p0_list = []
+    pbar = tqdm(total=nwalkers)
+    while len(p0_list) < nwalkers:
+        p = np.array(
+            [
+                priors[key].dist.rvs() for key in gal_par_names
+            ] + [
+                #priors['latent_FeH'].dist[0].rvs() for i in range(CaHK_FeH_Priors.n)
+                randdist(
+                    priors['latent_FeH'].xsmooth,
+                    priors['latent_FeH'].smoothed_pdf[i],
+                    nvals=1,
+                )[0] for i in range(priors['latent_FeH'].n)
+            ]
+        )
+        logP = log_probability(
+            p,
+            default_par=par,
+            priors=priors,
+            gal_par_names=gal_par_names,
+        )
+        if logP > p0_min_logP:
+            p0_list.append(p)
+            pbar.update(1)
+    pbar.close()
+    p0 = np.vstack(p0_list)
+    np.save(p0_file, p0)
 nwalkers, ndim = p0.shape
 
 
