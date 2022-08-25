@@ -164,7 +164,7 @@ else:
 nwalkers, ndim = p0.shape
 
 
-def log_likelihood_wrapper(p, default_par, gal_par_names):
+def log_likelihood_wrapper(p, default_par, gal_par_names, floor=1e-20):
     """
     Wrapper to parse p into p_gal and p_star and pass to waf.sampling.log_likelihood
     """
@@ -172,7 +172,7 @@ def log_likelihood_wrapper(p, default_par, gal_par_names):
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    logL = log_likelihood(p_gal, p_star, default_par, gal_par_names)
+    logL = log_likelihood(p_gal, p_star, default_par, gal_par_names, floor)
     return logL
 
 
@@ -198,6 +198,7 @@ with mp.Pool(mp.cpu_count()) as pool:
         log_likelihood_kwargs=dict(
             default_par=par,
             gal_par_names=gal_par_names,
+            floor=1e-20,
         ),
         log_prior=log_prior_wrapper,
         log_prior_kwargs=dict(
