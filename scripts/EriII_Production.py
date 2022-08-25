@@ -20,7 +20,7 @@ import matplotlib.transforms as transforms
 nwalkers = 5000
 dt = 0.001  # Gyr
 t_trunc = 1.0  # Gyr
-p0_min_logP = -150  # -np.inf
+p0_min_logP = -100  # -np.inf
 plotting = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
@@ -68,6 +68,8 @@ gal_priors = dict(
 )
 gal_par_names = list(gal_priors.keys())
 priors = {**gal_priors, **dict(latent_FeH=CaHK_FeH_Priors)}
+
+# Bounds for pocoMC
 bounds = np.array(
     [
         [priors[key].lower_bound, priors[key].upper_bound]
@@ -76,6 +78,7 @@ bounds = np.array(
         [np.nan, np.nan] for i in range(CaHK_FeH_Priors.n)
     ]
 )
+bounds[~np.isfinite(bounds)] = np.nan
 
 # Plot MDF
 if plotting:
