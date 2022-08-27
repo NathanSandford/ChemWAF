@@ -18,7 +18,9 @@ import matplotlib.transforms as transforms
 
 # Inputs
 nwalkers = 5000
-dt = 0.001  # Gyr
+nsamples = 10000
+dFeH = 1e-2  # dex
+dt = 1e-5  # Gyr
 t_trunc = 1.0  # Gyr
 p0_min_logP = -100  # -np.inf
 reload_p0 = True  # Use previous p0 if it exists, skipping the costly initialization
@@ -26,7 +28,7 @@ reload_p0 = True  # Use previous p0 if it exists, skipping the costly initializa
 plotting = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-output_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII.npz')
+results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_results.npz')
 p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
@@ -54,16 +56,16 @@ eri_ii_mdf = {
 }
 
 # Load CaHK Abundance Poterior Samples
-samples = pd.read_csv(samp_file, index_col=0)
+CaHK_samples = pd.read_csv(samp_file, index_col=0)
 
 # Load Default Parameters
 par = DefaultParSet()
 par.update({'IaDTD_fn': 'powerlaw'})  # -1.1 Powerlaw DTD
 par.t = np.arange(dt, t_trunc+dt, dt)
-fine_bins = np.linspace(-10, 2.0, 1201)  # d[Fe/H] = 0.01 dex
+fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 
 # Define Priors
-CaHK_FeH_Priors = KDELogPrior('latent_FeH', samples.values.T, fine_bins, xlow=-4)
+CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4)
 gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0, np.inf),
@@ -211,10 +213,10 @@ with mp.Pool(mp.cpu_count()) as pool:
     # Run sampler
     sampler.run(p0)
     # Add extra samples
-    sampler.add_samples(9000)
+    sampler.add_samples(nsamples - nwalkers)
 # Save Results
 results = sampler.results
-np.savez(output_file, **results)
+np.savez(results_file, **results)
 # Plot pocoMC Diagnostic Plots
 if plotting:
     run_fig = pc.plotting.run(results)
