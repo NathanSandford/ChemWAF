@@ -42,6 +42,11 @@ def get_PDF(
         pdf_raw = weights[1:] / np.diff(val)
         pdf_grid = np.interp(grid, val[1:], pdf_raw, left=floor, right=floor)
         pdf_grid /= np.trapz(pdf_grid, grid)
+    elif np.all(np.diff(val) < 0):
+        pdf_method = 'strictly monotonically decreasing'
+        pdf_raw = weights[1:][::-1] / np.diff(val[::-1])
+        pdf_grid = np.interp(grid, val[1:][::-1], pdf_raw, left=floor, right=floor)
+        pdf_grid /= np.trapz(pdf_grid, grid)
     elif np.all(np.diff(val) >= 0):
         pdf_method = 'monotonically increasing (w/ zeros)'
         # Fall back on histogram method

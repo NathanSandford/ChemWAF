@@ -10,7 +10,7 @@ def log_prior(p_gal, p_star, priors):
 
 def log_likelihood(p_gal, p_star, default_par, gal_par_names, floor=1e-10):
     default_par.update(p_gal)
-    SFR, OH, FeH, OFe = waf2017(**default_par.__dict__)
+    SFR, OH, FeH, OFe = waf2017(**default_par.model_kwargs)
     if ~np.all(np.isfinite(OH)) or ~np.all(np.isfinite(FeH)) or ~np.all(np.isfinite(OFe)):
         return -np.inf
     FeH_PDF, grid = get_PDF(
@@ -77,7 +77,7 @@ def ppc(p, default_par, gal_par_names, obs_mdf, pdf_grid=None):
         p_star = p[i, len(gal_par_names):]
         p_gal = {par_name: p[i, :len(gal_par_names)][j] for j, par_name in enumerate(gal_par_names)}
         default_par.update(p_gal)
-        sfr, oh, feh, ofe = waf2017(**default_par.__dict__)
+        sfr, oh, feh, ofe = waf2017(**default_par.model_kwargs)
         SFR[i], OH[i], FeH[i], OFe[i] = sfr, oh, feh, ofe
         FeH_PDF[i], _ = get_PDF(feh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
         OH_PDF[i], _ = get_PDF(oh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
