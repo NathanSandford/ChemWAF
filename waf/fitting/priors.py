@@ -1,9 +1,9 @@
-from tqdm import tqdm
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.stats import uniform, truncnorm, rv_histogram
 from pesummary.core.plots.bounded_1d_kde import bounded_1d_kde
 from waf.utils import histogram
+
 
 class UniformLogPrior:
     def __init__(self, label, lower_bound, upper_bound, out_of_bounds_val=-1e10):
@@ -14,7 +14,6 @@ class UniformLogPrior:
         self.dist = uniform(loc=self.lower_bound, scale=self.upper_bound-self.lower_bound)
 
     def __call__(self, x):
-        #return uniform.logpdf(x, loc=self.lower_bound, scale=self.upper_bound-self.lower_bound)
         return self.dist.logpdf(x)
 
 
@@ -30,7 +29,6 @@ class GaussianLogPrior:
         self.dist = truncnorm(a=self.a, b=self.b, loc=self.mu, scale=self.sigma)
 
     def __call__(self, x):
-        #return truncnorm.logpdf(x, a=self.a, b=self.b, loc=self.mu, scale=self.sigma)
         return self.dist.logpdf(x)
 
 
@@ -90,22 +88,3 @@ class KDELogPrior:
             return np.log(self.dist(x))
         else:
             return np.log(self.dist(x).diagonal())
-
-
-#class SampleLogPrior:
-#    def __init__(self, label, samples, bins=25, interp_method='quadratic', out_of_bounds_val=1e-10):
-#        self.label = label
-#        self.samples = samples
-#        pdf, bins = histogram(samples, bins=bins, density=True)
-#        self.bins = bins
-#        self.bin_centers = np.convolve(bins, np.ones(2), 'valid') / 2
-#        self.pdf = interp1d(
-#            self.bin_centers,
-#            pdf,
-#            kind=interp_method,
-#            fill_value=out_of_bounds_val,
-#            bounds_error=False
-#        )
-#
-#    def __call__(self, x):
-#        return np.log(self.pdf(x).diagonal())

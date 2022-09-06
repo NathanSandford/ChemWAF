@@ -3,6 +3,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.stats import uniform, halfnorm
 
+
 def get_MDF(
     x: np.ndarray,
     sfr: np.ndarray,
@@ -23,7 +24,7 @@ def get_PDF(
     boundary_width: Optional[float] = None,
     floor: float = 0,
 ):
-    '''
+    """
 
     :param val:
     :param weights:
@@ -31,9 +32,10 @@ def get_PDF(
     :param lower_bound:
     :param upper_bound:
     :param boundary_width:
+    :param boundary_dist:
     :param floor:
     :return:
-    '''
+    """
     if grid is None:
         # Set grid for interpolation in val-space if none is given
         grid = np.linspace(val.min(), val.max(), 1001)
@@ -124,8 +126,6 @@ def censor_distribution(
                 censored_dist += truncated_mass * uniform.pdf(x, loc=lower_bound, scale=boundary_width)
             else:
                 raise NotImplementedError(f'{boundary_dist} is not implemented')
-            #censored_dist[lower_bound_idx1:lower_bound_idx2] \
-            #    += truncated_mass / (np.diff(x)[0] * boundary_width_pixels)
     if (
         (upper_bound is not None)  # If there is a upper_bound provided
         and (x[-1] > upper_bound)  # If there are any values to censor
@@ -148,8 +148,6 @@ def censor_distribution(
                 censored_dist += truncated_mass * uniform.pdf(-x, loc=-upper_bound, scale=boundary_width)
             else:
                 raise NotImplementedError(f'{boundary_dist} is not implemented')
-            #censored_dist[upper_bound_idx2+1:upper_bound_idx1+1] \
-            #    += truncated_mass / (np.diff(x)[0] * boundary_width_pixels)
     censored_dist /= np.trapz(censored_dist, x)
     if np.any(censored_dist < 0):
         raise RuntimeError('Negative PDF value detected')
@@ -159,21 +157,21 @@ def censor_distribution(
 def randdist(x, pdf, nvals):
     """Produce nvals random samples from pdf(x), assuming constant spacing in x."""
     # get cumulative distribution from 0 to 1
-    if np.diff(x).max() -  np.diff(x).min() > 1e-10:
+    if np.max(np.diff(x)) - np.min(np.diff(x)) > 1e-10:
         raise RuntimeError('x must have constant spacing')
-    cumpdf = np.cumsum(pdf)
-    cumpdf *= 1/cumpdf[-1]
+    cum_pdf = np.cumsum(pdf)
+    cum_pdf *= 1/cum_pdf[-1]
     # input random values
-    randv = np.random.uniform(size=nvals)
+    rand_var = np.random.uniform(size=nvals)
     # find where random values would go
-    idx1 = np.searchsorted(cumpdf, randv)
+    idx1 = np.searchsorted(cum_pdf, rand_var)
     # get previous value, avoiding division by zero below
-    idx0 = np.where(idx1==0, 0, idx1-1)
-    idx1[idx0==0] = 1
+    idx0 = np.where(idx1 == 0, 0, idx1-1)
+    idx1[idx0 == 0] = 1
     # do linear interpolation in x
-    frac1 = (randv - cumpdf[idx0]) / (cumpdf[idx1] - cumpdf[idx0])
-    randdist = x[idx0]*(1-frac1) + x[idx1]*frac1
-    return randdist
+    frac1 = (rand_var - cum_pdf[idx0]) / (cum_pdf[idx1] - cum_pdf[idx0])
+    samples = x[idx0]*(1-frac1) + x[idx1]*frac1
+    return samples
 
 
 def histogram(data, bins, density=False):
@@ -189,7 +187,7 @@ def histogram(data, bins, density=False):
     bin_centers = np.convolve(bins, np.ones(2), 'valid') / 2
     data2D = data.reshape(-1, N)
     idx = np.searchsorted(bins, data2D, 'right')-1
-    bad_mask = (idx==-1) | (idx==len(bins))
+    bad_mask = (idx == -1) | (idx == len(bins))
     scaled_idx = len(bins) * np.arange(data2D.shape[0])[:, None] + idx
     limit = len(bins) * data2D.shape[0]
     scaled_idx[bad_mask] = limit

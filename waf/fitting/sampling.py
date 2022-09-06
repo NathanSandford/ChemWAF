@@ -1,21 +1,22 @@
 import numpy as np
 from waf.models import waf2017
-from waf.utils import get_PDF
+from waf.utils import get_PDF, get_MDF
+
 
 def log_prior(p_gal, p_star, priors):
-    logPi = np.sum([priors[key](value) for key, value in p_gal.items()])
-    logPi += np.sum(priors['latent_FeH'](p_star))
-    return logPi
+    log_pi = np.sum([priors[key](value) for key, value in p_gal.items()])
+    log_pi += np.sum(priors['latent_FeH'](p_star))
+    return log_pi
 
 
-def log_likelihood(p_gal, p_star, default_par, gal_par_names, floor=1e-10):
+def log_likelihood(p_gal, p_star, default_par, floor=1e-10):
     default_par.update(p_gal)
-    SFR, OH, FeH, OFe = waf2017(**default_par.model_kwargs)
-    if ~np.all(np.isfinite(OH)) or ~np.all(np.isfinite(FeH)) or ~np.all(np.isfinite(OFe)):
+    sfr, oh, feh, ofe = waf2017(**default_par.model_kwargs)
+    if ~np.all(np.isfinite(oh)) or ~np.all(np.isfinite(feh)) or ~np.all(np.isfinite(ofe)):
         return -np.inf
-    FeH_PDF, grid = get_PDF(
-        FeH,
-        SFR,
+    feh_pdf, grid = get_PDF(
+        feh,
+        sfr,
         grid=None,
         lower_bound=-4,
         upper_bound=None,
@@ -23,10 +24,10 @@ def log_likelihood(p_gal, p_star, default_par, gal_par_names, floor=1e-10):
         boundary_width=0.35,
         floor=floor,
     )
-    logL = np.sum(np.log(np.interp(p_star, grid, FeH_PDF, left=0, right=0)))
-    if np.isnan(logL):
-        raise RuntimeError('NaN found in logL')
-    return logL
+    log_like = np.sum(np.log(np.interp(p_star, grid, feh_pdf, left=0, right=0)))
+    if np.isnan(log_like):
+        raise RuntimeError('NaN found in log_like')
+    return log_like
 
 
 def log_probability(p, default_par, priors, gal_par_names):
@@ -34,13 +35,13 @@ def log_probability(p, default_par, priors, gal_par_names):
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    logPi = log_prior(p_gal, p_star, priors)
-    logL = log_likelihood(p_gal, p_star, default_par, gal_par_names)
-    logP = logPi + logL
-    if np.isnan(logP):
+    log_pi = log_prior(p_gal, p_star, priors)
+    log_like = log_likelihood(p_gal, p_star, default_par, gal_par_names)
+    log_prob = log_pi + log_like
+    if np.isnan(log_prob):
         return -np.inf
     else:
-        return logP
+        return log_prob
 
 
 def ppc(p, default_par, gal_par_names, obs_mdf, pdf_grid=None):
@@ -53,45 +54,43 @@ def ppc(p, default_par, gal_par_names, obs_mdf, pdf_grid=None):
     n_grid = pdf_grid.shape[0]
     try:
         n_obs_feh_bins = len(obs_mdf['FeH_bins']) - 1
-    except:
+    except KeyError:
         n_obs_feh_bins = 1
     try:
         n_obs_oh_bins = len(obs_mdf['OH_bins']) - 1
-    except:
+    except KeyError:
         n_obs_oh_bins = 1
     try:
         n_obs_ofe_bins = len(obs_mdf['OFe_bins']) - 1
-    except:
+    except KeyError:
         n_obs_ofe_bins = 1
-    SFR = np.zeros((n_draws, n_timesteps))
-    OH = np.zeros((n_draws, n_timesteps))
-    FeH = np.zeros((n_draws, n_timesteps))
-    OFe = np.zeros((n_draws, n_timesteps))
-    OH_PDF = np.zeros((n_draws,  n_grid))
-    FeH_PDF = np.zeros((n_draws, n_grid))
-    OFe_PDF = np.zeros((n_draws, n_grid))
-    OH_MDF = np.zeros((n_draws,  n_obs_oh_bins))
-    FeH_MDF = np.zeros((n_draws, n_obs_feh_bins))
-    OFe_MDF = np.zeros((n_draws, n_obs_ofe_bins))
+    sfr = np.zeros((n_draws, n_timesteps))
+    oh = np.zeros((n_draws, n_timesteps))
+    feh = np.zeros((n_draws, n_timesteps))
+    ofe = np.zeros((n_draws, n_timesteps))
+    oh_pdf = np.zeros((n_draws,  n_grid))
+    feh_pdf = np.zeros((n_draws, n_grid))
+    ofe_pdf = np.zeros((n_draws, n_grid))
+    oh_mdf = np.zeros((n_draws,  n_obs_oh_bins))
+    feh_mdf = np.zeros((n_draws, n_obs_feh_bins))
+    ofe_mdf = np.zeros((n_draws, n_obs_ofe_bins))
     for i in range(n_draws):
-        p_star = p[i, len(gal_par_names):]
         p_gal = {par_name: p[i, :len(gal_par_names)][j] for j, par_name in enumerate(gal_par_names)}
         default_par.update(p_gal)
-        sfr, oh, feh, ofe = waf2017(**default_par.model_kwargs)
-        SFR[i], OH[i], FeH[i], OFe[i] = sfr, oh, feh, ofe
-        FeH_PDF[i], _ = get_PDF(feh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
-        OH_PDF[i], _ = get_PDF(oh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
-        OFe_PDF[i], _ = get_PDF(ofe, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
+        sfr[i], oh[i], feh[i], ofe[i] = waf2017(**default_par.model_kwargs)
+        feh_pdf[i], _ = get_PDF(feh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
+        oh_pdf[i], _ = get_PDF(oh, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
+        ofe_pdf[i], _ = get_PDF(ofe, sfr, grid=pdf_grid, lower_bound=-4, upper_bound=None, boundary_width=0.1)
         try:
-            OH_MDF[i] = get_MDF(oh, sfr, obs_mdf['OH_bins']) * obs_mdf['OH_counts'].sum()
-        except:
-            OH_MDF[i] = get_MDF(oh, sfr, obs_mdf['OH_bins'])
+            oh_mdf[i] = get_MDF(oh, sfr, obs_mdf['OH_bins']) * obs_mdf['OH_counts'].sum()
+        except KeyError:
+            oh_mdf[i] = get_MDF(oh, sfr, obs_mdf['OH_bins'])
         try:
-            FeH_MDF[i] = get_MDF(feh.clip(-4,np.inf), sfr, obs_mdf['FeH_bins']) * obs_mdf['FeH_counts'].sum()
-        except:
-            FeH_MDF[i] = get_MDF(feh, sfr, obs_mdf['FeH_bins'])
+            feh_mdf[i] = get_MDF(feh.clip(-4,np.inf), sfr, obs_mdf['FeH_bins']) * obs_mdf['FeH_counts'].sum()
+        except KeyError:
+            feh_mdf[i] = get_MDF(feh, sfr, obs_mdf['FeH_bins'])
         try:
-            OFe_MDF[i] = get_MDF(ofe, sfr, obs_mdf['OFe_bins']) * obs_mdf['OFe_counts'].sum()
-        except:
-            OFe_MDF[i] = get_MDF(ofe, sfr, obs_mdf['OFe_bins'])
-    return SFR, OH, FeH, OFe, OH_PDF, FeH_PDF, OFe_PDF, OH_MDF, FeH_MDF, OFe_MDF
+            ofe_mdf[i] = get_MDF(ofe, sfr, obs_mdf['OFe_bins']) * obs_mdf['OFe_counts'].sum()
+        except KeyError:
+            ofe_mdf[i] = get_MDF(ofe, sfr, obs_mdf['OFe_bins'])
+    return sfr, oh, feh, ofe, oh_pdf, feh_pdf, ofe_pdf, oh_mdf, feh_mdf, ofe_mdf
