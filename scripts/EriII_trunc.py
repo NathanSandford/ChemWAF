@@ -16,6 +16,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import matplotlib.transforms as transforms
+np.seterr(all="ignore")
 
 # Inputs
 n_walkers = 5000
@@ -191,6 +192,7 @@ else:
             default_par=par,
             priors=priors,
             gal_par_names=gal_par_names,
+            floor=1e-20,
         )
         if logP > p0_min_logP:
             p0_list.append(p)

@@ -30,7 +30,7 @@ def log_likelihood(p_gal, p_star, default_par, floor=1e-10):
     return log_like
 
 
-def log_probability(p, default_par, priors, gal_par_names, floor):
+def log_probability(p, default_par, priors, gal_par_names, floor=1e-10):
     if p.ndim > 1:
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
