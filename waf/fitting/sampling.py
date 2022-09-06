@@ -30,13 +30,13 @@ def log_likelihood(p_gal, p_star, default_par, floor=1e-10):
     return log_like
 
 
-def log_probability(p, default_par, priors, gal_par_names):
+def log_probability(p, default_par, priors, gal_par_names, floor):
     if p.ndim > 1:
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
     log_pi = log_prior(p_gal, p_star, priors)
-    log_like = log_likelihood(p_gal, p_star, default_par, gal_par_names)
+    log_like = log_likelihood(p_gal, p_star, default_par, floor)
     log_prob = log_pi + log_like
     if np.isnan(log_prob):
         return -np.inf

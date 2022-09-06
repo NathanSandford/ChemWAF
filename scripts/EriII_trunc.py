@@ -1,5 +1,5 @@
 """
-Eri II MDF Fitting Script: Production Run
+Eri II MDF Fitting Script: Production Run w/ Free t_trunc
 """
 from pathlib import Path
 from tqdm import tqdm
@@ -174,6 +174,7 @@ else:
             default_par=par,
             priors=priors,
             gal_par_names=gal_par_names,
+            floor=1e-20,
         )
         if logP > p0_min_logP:
             p0_list.append(p)
