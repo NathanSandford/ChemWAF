@@ -81,7 +81,7 @@ class KDELogPrior:
             kde_eval = kde(xsmooth)
             smoothed_pdf.append(kde_eval / np.trapz(kde_eval, xsmooth))
         self.smoothed_pdf = np.vstack(smoothed_pdf)
-        self.dist = interp1d(xsmooth, self.smoothed_pdf, axis=-1)
+        self.dist = interp1d(xsmooth, self.smoothed_pdf, axis=-1, bounds_error=False, fill_value=out_of_bounds_val)
 
     def __call__(self, x, shared_x=False):
         if shared_x:
