@@ -64,7 +64,7 @@ eri_ii_mdf = {
     'FeH_bins': obs_bins,
 }
 
-# Load CaHK Abundance Poterior Samples
+# Load CaHK Abundance Posterior Samples
 CaHK_samples = pd.read_csv(samp_file, index_col=0)
 
 # Load Default Parameters
@@ -199,7 +199,7 @@ else:
             progress_bar.update(1)
     progress_bar.close()
     p0 = np.vstack(p0_list)
-    np.save('p0.npy', p0)
+    np.save(p0_file, p0)
 n_walkers, n_dim = p0.shape
 
 
@@ -211,8 +211,8 @@ def log_likelihood_wrapper(p, default_par, gal_par_names, floor=1e-20):
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    logL = log_likelihood(p_gal, p_star, default_par, gal_par_names, floor)
-    return logL
+    log_like = log_likelihood(p_gal, p_star, default_par, floor)
+    return log_like
 
 
 def log_prior_wrapper(p, priors, gal_par_names):
@@ -223,8 +223,8 @@ def log_prior_wrapper(p, priors, gal_par_names):
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    logPi = log_prior(p_gal, p_star, priors)
-    return logPi
+    log_pi = log_prior(p_gal, p_star, priors)
+    return log_pi
 
 
 # Run PMC Sampling
