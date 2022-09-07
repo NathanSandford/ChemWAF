@@ -24,7 +24,7 @@ def log_likelihood(p_gal, p_star, default_par, floor=1e-10):
         boundary_width=0.35,
         floor=floor,
     )
-    log_like = np.sum(np.log(np.interp(p_star, grid, feh_pdf, left=0, right=0)))
+    log_like = np.sum(np.log(np.interp(p_star, grid, feh_pdf, left=floor, right=floor)))
     if np.isnan(log_like):
         raise RuntimeError('NaN found in log_like')
     return log_like
