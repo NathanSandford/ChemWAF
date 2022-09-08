@@ -5,9 +5,9 @@ def waf2017(
     t: np.ndarray,
     tauSFE: float = 2.0,
     tauSFH: float = 8.0,
-    mAlphaCC: float = 0.015,
-    mFeCC: float = 0.00015,
-    mFeIa: float = 0.0013,
+    yAlphaCC: float = 0.015,
+    yFeCC: float = 0.00015,
+    yFeIa: float = 0.0013,
     fRetCC: float = 1.,
     fRetIa: float = 1.,
     r: float = 0.4,
@@ -28,9 +28,9 @@ def waf2017(
     :param float tauSFE: SFE efficiency timescale [2.0]
     :param float tauSFH: e-folding timescale of SFH [8.0]
         (Ignored if SFH_fn == 'constant')
-    :param float mAlphaCC: IMF-averaged CCSN alpha yield [0.015]
-    :param float mFeCC: IMF-averaged CCSN iron yield [0.0015]
-    :param float mFeIa: IMF-averaged SNIa iron yield over 10 Gyr [0.0013]
+    :param float yAlphaCC: IMF-averaged CCSN alpha yield [0.015]
+    :param float yFeCC: IMF-averaged CCSN iron yield [0.0015]
+    :param float yFeIa: IMF-averaged SNIa iron yield over 10 Gyr [0.0013]
     :param float fRetCC:
     :param float fRetIa:
     :param float r: recycling fraction [0.4, based on Kroupa IMF]
@@ -53,9 +53,9 @@ def waf2017(
     xfac = 1.0013478
     yfac = 1.0016523
     # Modulate Yields by Return Fraction
-    mAlphaCC *= fRetCC
-    mFeCC *= fRetCC
-    mFeIa *= fRetIa
+    yAlphaCC *= fRetCC
+    yFeCC *= fRetCC
+    yFeIa *= fRetIa
     # Parse Ia DTD
     if IaDTD_fn == 'exponential':
         tauIa1 = tauIa
@@ -95,10 +95,10 @@ def waf2017(
     else:
         RuntimeError("SFH_fn must be one of 'constant', 'exponential', or 'linexp' ")
     # Compute equilibrium abundances, WAF equations 28-30
-    ZAlphaEq = mAlphaCC * tauDepSFH / tauSFE
-    ZFeCCEq = mFeCC * tauDepSFH / tauSFE
-    ZFeIaEq1 = Ia_norm1 * mFeIa * ((tauDepSFH / tauSFE) * (tauIaSFH1 / tauIa1) * np.exp(tDminIa / tauSFH))
-    ZFeIaEq2 = Ia_norm2 * mFeIa * ((tauDepSFH / tauSFE) * (tauIaSFH2 / tauIa2) * np.exp(tDminIa / tauSFH))
+    ZAlphaEq = yAlphaCC * tauDepSFH / tauSFE
+    ZFeCCEq = yFeCC * tauDepSFH / tauSFE
+    ZFeIaEq1 = Ia_norm1 * yFeIa * ((tauDepSFH / tauSFE) * (tauIaSFH1 / tauIa1) * np.exp(tDminIa / tauSFH))
+    ZFeIaEq2 = Ia_norm2 * yFeIa * ((tauDepSFH / tauSFE) * (tauIaSFH2 / tauIa2) * np.exp(tDminIa / tauSFH))
     # Compute non-equilibrium abundances
     if SFH_fn in ['constant', 'exponential']:  # WAF equations 50, 52, and 53
         delta_t = t - tDminIa

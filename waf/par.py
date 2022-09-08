@@ -6,9 +6,9 @@ class DefaultParSet:
     ):
         self.tauSFE = 2.0
         self.tauSFH = 8.0
-        self.mAlphaCC = 0.015
-        self.mFeCC = 0.0015
-        self.mFeIa = 0.0013
+        self.yAlphaCC = 0.015
+        self.yFeCC = 0.0015
+        self.yFeIa = 0.0013
         self.fRetCC = 1.
         self.fRetIa = 1.
         self.r = 0.4
@@ -25,9 +25,9 @@ class DefaultParSet:
         self.model_kwargs = dict(
             tauSFE=self.tauSFE,
             tauSFH=self.tauSFH,
-            mAlphaCC=self.mAlphaCC,
-            mFeCC=self.mFeCC,
-            mFeIa=self.mFeIa,
+            yAlphaCC=self.yAlphaCC,
+            yFeCC=self.yFeCC,
+            yFeIa=self.yFeIa,
             fRetCC=self.fRetCC,
             fRetIa=self.fRetIa,
             r=self.r,
@@ -54,9 +54,9 @@ class DefaultParSet:
         self.model_kwargs = dict(
             tauSFE=self.tauSFE,
             tauSFH=self.tauSFH,
-            mAlphaCC=self.mAlphaCC,
-            mFeCC=self.mFeCC,
-            mFeIa=self.mFeIa,
+            yAlphaCC=self.yAlphaCC,
+            yFeCC=self.yFeCC,
+            yFeIa=self.yFeIa,
             fRetCC=self.fRetCC,
             fRetIa=self.fRetIa,
             r=self.r,
