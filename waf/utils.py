@@ -59,9 +59,13 @@ def get_PDF(
     else:
         pdf_method = 'non-monotonic'
         idx_inc = np.diff(val) > 0
-        idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
         idx_dec = np.diff(val) < 0
-        idx_dec = np.concatenate([[np.diff(val)[0] < 0], idx_dec])
+        if (idx_inc[0] == True) and (idx_dec[0] == False):
+            idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
+            idx_dec = np.concatenate([[np.diff(val)[0] < 0], idx_dec])
+        if (idx_inc[0] == False) and (idx_dec[0] == True):
+            idx_inc = np.concatenate([idx_inc, [np.diff(val)[0] > 0]])
+            idx_dec = np.concatenate([idx_dec, [np.diff(val)[0] < 0]])
         val_inc = val[idx_inc]
         val_dec = val[idx_dec]
         # Handle increasing portion
