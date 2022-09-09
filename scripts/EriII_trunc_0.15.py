@@ -37,13 +37,13 @@ yFeCC = 0.0012  # Johnson & Weinberg (2020)
 yFeIa = 0.003  # Conroy+ (2022)
 logP_floor = -50
 p0_min_logP = -100
-reload_p0 = True  # Use previous p0 if it exists, skipping the costly initialization
+reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_trunc.npz')
-p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_trunc_p0.npy')
+results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_trunc_0.15.npz')
+p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_trunc_0.15_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
