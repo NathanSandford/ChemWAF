@@ -26,14 +26,18 @@ dt = 1e-5  # Gyr
 IaDTD_fn = 'powerlaw'  # -1.1 Powerlaw DTD; Maoz+ (2012)
 tDminIa = 0.05  # Gyr; Citation?
 r = 0.37  # Kroupa IMF after 1 Gyr
-SolarAlpha = 0.0056  # Alpha == O; Asplund (2009)
-# SolarAlpha = 0.0007  # Alpha == Mg; Asplund (2009)
 SolarFe = 0.0013  # Asplund (2009)
-mAlphaCC = 0.015  # Alpha == O; Chieffi & Limongi (2004), Limongi & Chieffi (2006), and Andrews+ (2017)
-mFeCC = 0.0015  # Match to Hayden+ (2015)
-mFeIa = 0.0013  # Match to Hayden+ (2015)
-p0_min_logP = -100  # -np.inf
-reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
+# SolarAlpha = 0.0056  # Alpha == O; Asplund (2009)
+# yAlphaCC = 0.015  # Alpha == O; Chieffi & Limongi (2004), Limongi & Chieffi (2006), and Andrews+ (2017)
+# yFeCC = 0.0015  # Match to Hayden+ (2015)
+# yFeIa = 0.0013  # Match to Hayden+ (2015)
+SolarAlpha = 0.0007  # Alpha == Mg; Asplund (2009)
+yAlphaCC = 0.0026  # Alpha == Mg; Johnson & Weinberg (2020)
+yFeCC = 0.0012  # Johnson & Weinberg (2020)
+yFeIa = 0.003  # Conroy+ (2022)
+logP_floor = -50
+p0_min_logP = -100
+reload_p0 = True  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = True
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
@@ -76,16 +80,17 @@ par.update({
     'dt': dt,
     'SolarAlpha': SolarAlpha,
     'SolarFe': SolarFe,
-    'mAlphaCC': mAlphaCC,
-    'mFeCC': mFeCC,
+    'yAlphaCC': yAlphaCC,
+    'yFeCC': yFeCC,
+    'yFeIa': yFeIa,
 })
 fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 
 # Define Priors
-CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4)
+CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4, out_of_bounds_val=10**logP_floor)
 gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
-    tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0, np.inf),
+    tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
     t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, np.inf),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
     fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
@@ -100,7 +105,7 @@ bounds = np.array(
         [priors[key].lower_bound, priors[key].upper_bound]
         for key in gal_par_names
     ] + [
-        [np.nan, np.nan] for i in range(CaHK_FeH_Priors.n)
+        [-4, np.nan] for i in range(CaHK_FeH_Priors.n)
     ]
 )
 bounds[~np.isfinite(bounds)] = np.nan
@@ -147,7 +152,7 @@ if plotting:
     ax2.grid(False)
     ax1.yaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True, prune='lower', nbins=6))
     plt.tight_layout()
-    plt.savefig(fig_dir.joinpath('EriII_MDF.png'))
+    plt.savefig(fig_dir.joinpath('EriII_trunc_MDF.png'))
     plt.show()
 
 # Initialize Walkers
@@ -175,24 +180,25 @@ else:
             default_par=par,
             priors=priors,
             gal_par_names=gal_par_names,
-            floor=1e-20,
+            floor=10**logP_floor,
         )
         if logP > p0_min_logP:
             p0_list.append(p)
             progress_bar.update(1)
+    progress_bar.close()
     # Initialize remaining walkers by bootstrapping from existing set of walkers and adding scatter
     # Not strictly initializing from the priors per se, it's substantially faster and close enough
     print(f'Generating remaining {int(n_walkers - n_walkers / 10)} walkers')
     progress_bar = tqdm(total=n_walkers, initial=len(p0_list))
     while len(p0_list) < n_walkers:
         seed_p = random.sample(p0_list, 1)[0]
-        p = np.random.normal(loc=seed_p, scale=np.abs(0.01 * seed_p))
+        p = np.random.normal(loc=seed_p, scale=np.abs(0.05 * seed_p))
         logP = log_probability(
             p,
             default_par=par,
             priors=priors,
             gal_par_names=gal_par_names,
-            floor=1e-20,
+            floor=10**logP_floor,
         )
         if logP > p0_min_logP:
             p0_list.append(p)
@@ -209,10 +215,12 @@ def log_likelihood_wrapper(p, default_par, gal_par_names, floor=1e-20):
     """
     if p.ndim > 1:
         raise AttributeError('log_prior is not vectorized')
+    if np.any(~np.isfinite(p)):
+        return -np.inf
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    log_like = log_likelihood(p_gal, p_star, default_par, floor)
-    return log_like
+    logL = log_likelihood(p_gal, p_star, default_par, floor)
+    return logL
 
 
 def log_prior_wrapper(p, priors, gal_par_names):
@@ -237,7 +245,7 @@ with mp.Pool(mp.cpu_count()) as pool:
         log_likelihood_kwargs=dict(
             default_par=par,
             gal_par_names=gal_par_names,
-            floor=1e-20,
+            floor=10**logP_floor,
         ),
         log_prior=log_prior_wrapper,
         log_prior_kwargs=dict(
@@ -257,9 +265,9 @@ np.savez(results_file, **results)
 # Plot pocoMC Diagnostic Plots
 if plotting:
     run_fig = pc.plotting.run(results)
-    run_fig.savefig(fig_dir.joinpath('EriII_pocoMC_run.png'))
+    run_fig.savefig(fig_dir.joinpath('EriII_trunc_pocoMC_run.png'))
     trace_fig = pc.plotting.trace(
         results,
         labels=gal_par_names + [f'FeH{i:02.0f}' for i in range(n_star)],
     )
-    trace_fig.savefig(fig_dir.joinpath('EriII_pocoMC_trace.png'))
+    trace_fig.savefig(fig_dir.joinpath('EriII_trunc_pocoMC_trace.png'))
