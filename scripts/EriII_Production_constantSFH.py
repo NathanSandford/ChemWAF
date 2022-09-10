@@ -1,5 +1,5 @@
 """
-Eri II MDF Fitting Script: Production Run w/ Free t_trunc
+Eri II MDF Fitting Script: Production Run
 """
 from pathlib import Path
 from tqdm import tqdm
@@ -23,6 +23,7 @@ n_walkers = 5000
 n_samples = 10000
 dFeH = 1e-2  # dex
 dt = 1e-5  # Gyr
+t_trunc = 1.0  # Gyr
 SFH_fn = 'constant'
 IaDTD_fn = 'powerlaw'  # -1.1 Powerlaw DTD; Maoz+ (2012)
 tDminIa = 0.05  # Gyr; Citation?
@@ -43,8 +44,8 @@ reload_p0 = False  # Use previous p0 if it exists, skipping the costly initializ
 plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_trunc_constantSFH.npz')
-p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_trunc_constantSFH_p0.npy')
+results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_eta.npz')
+p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_eta_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
@@ -89,10 +90,9 @@ par.update({
 fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 
 # Define Priors
-CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4, out_of_bounds_val=10**logP_floor)
+CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4)
 gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
-    t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, np.inf),
     eta=GaussianLogPrior('eta', 20, 5, 0, 1e3),
     fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
     fRetIa=UniformLogPrior('fRetIa', 0, 1, -np.inf),
@@ -153,7 +153,7 @@ if plotting:
     ax2.grid(False)
     ax1.yaxis.set_major_locator(mpl.ticker.MaxNLocator(integer=True, prune='lower', nbins=6))
     plt.tight_layout()
-    plt.savefig(fig_dir.joinpath('EriII_trunc_MDF.png'))
+    plt.savefig(fig_dir.joinpath('EriII_MDF.png'))
     plt.show()
 
 # Initialize Walkers
@@ -186,7 +186,6 @@ else:
         if logP > p0_min_logP:
             p0_list.append(p)
             progress_bar.update(1)
-    progress_bar.close()
     # Initialize remaining walkers by bootstrapping from existing set of walkers and adding scatter
     # Not strictly initializing from the priors per se, it's substantially faster and close enough
     print(f'Generating remaining {int(n_walkers - n_walkers / 10)} walkers')
@@ -232,8 +231,8 @@ def log_prior_wrapper(p, priors, gal_par_names):
         raise AttributeError('log_prior is not vectorized')
     p_star = p[len(gal_par_names):]
     p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
-    log_pi = log_prior(p_gal, p_star, priors)
-    return log_pi
+    logPi = log_prior(p_gal, p_star, priors)
+    return logPi
 
 
 # Run PMC Sampling
@@ -266,9 +265,9 @@ np.savez(results_file, **results)
 # Plot pocoMC Diagnostic Plots
 if plotting:
     run_fig = pc.plotting.run(results)
-    run_fig.savefig(fig_dir.joinpath('EriII_trunc_pocoMC_run.png'))
+    run_fig.savefig(fig_dir.joinpath('EriII_pocoMC_run.png'))
     trace_fig = pc.plotting.trace(
         results,
         labels=gal_par_names + [f'FeH{i:02.0f}' for i in range(n_star)],
     )
-    trace_fig.savefig(fig_dir.joinpath('EriII_trunc_pocoMC_trace.png'))
+    trace_fig.savefig(fig_dir.joinpath('EriII_pocoMC_trace.png'))
