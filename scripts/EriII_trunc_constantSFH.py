@@ -93,7 +93,7 @@ CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xl
 gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
     t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, np.inf),
-    eta=GaussianLogPrior('eta', 20, 5, 0, 1e3),
+    eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
     fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
     fRetIa=UniformLogPrior('fRetIa', 0, 1, -np.inf),
 )
