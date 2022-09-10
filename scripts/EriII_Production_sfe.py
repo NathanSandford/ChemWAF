@@ -76,6 +76,7 @@ CaHK_samples = pd.read_csv(samp_file, index_col=0)
 # Load Default Parameters
 par = DefaultParSet()
 par.update({
+    't_trunc': t_trunc,
     'SFH_fn': SFH_fn,
     'IaDTD_fn': IaDTD_fn,
     'tDminIa': tDminIa,

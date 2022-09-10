@@ -23,6 +23,7 @@ n_walkers = 5000
 n_samples = 10000
 dFeH = 1e-2  # dex
 dt = 1e-5  # Gyr
+SFH_fn = 'exponential'
 IaDTD_fn = 'powerlaw'  # -1.1 Powerlaw DTD; Maoz+ (2012)
 tDminIa = 0.15  # Gyr; Citation?
 r = 0.37  # Kroupa IMF after 1 Gyr
@@ -74,6 +75,7 @@ CaHK_samples = pd.read_csv(samp_file, index_col=0)
 # Load Default Parameters
 par = DefaultParSet()
 par.update({
+    'SFH_fn': SFH_fn,
     'IaDTD_fn': IaDTD_fn,
     'tDminIa': tDminIa,
     'r': r,
