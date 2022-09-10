@@ -37,7 +37,7 @@ yAlphaCC = 0.0026  # Alpha == Mg; Johnson & Weinberg (2020)
 yFeCC = 0.0012  # Johnson & Weinberg (2020)
 yFeIa = 0.003  # Conroy+ (2022)
 logP_floor = -50
-p0_min_logP = -100
+p0_min_logP = -250
 reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = False
