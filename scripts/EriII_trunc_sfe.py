@@ -91,7 +91,7 @@ fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 # Define Priors
 CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4, out_of_bounds_val=10**logP_floor)
 gal_priors = dict(
-    logtauSFE=GaussianLogPrior('tauSFE', 2, 0.1, 0, 10),
+    logtauSFE=GaussianLogPrior('tauSFE', 10, 1, 0, 10),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
     t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, np.inf),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
