@@ -58,27 +58,32 @@ def get_PDF(
         pdf_grid /= np.trapz(pdf_grid, grid)
     else:
         pdf_method = 'non-monotonic'
-        idx_inc = np.diff(val) > 0
-        idx_dec = np.diff(val) < 0
-        if (idx_inc[0] == True) and (idx_dec[0] == False):
-            # Increasing First
-            idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
-            idx_dec = np.concatenate([[np.diff(val)[0] < 0], idx_dec])
-        if (idx_inc[0] == False) and (idx_dec[0] == True):
-            # Increasing Second
-            idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
-            idx_dec = np.concatenate([[np.diff(val)[0] < 0], idx_dec])
-        val_inc = val[idx_inc]
-        val_dec = val[idx_dec]
-        # Handle increasing portion
-        pdf_raw_inc = weights[idx_inc][1:] / np.diff(val_inc)
-        pdf_interp_inc = np.interp(grid, val_inc[1:], pdf_raw_inc, left=floor, right=floor)
-        # Handle decreasing portion (in reverse)
-        pdf_raw_dec = weights[idx_dec][:-1][::-1] / np.diff(val_dec[::-1])
-        pdf_interp_dec = np.interp(grid, val_dec[:-1][::-1], pdf_raw_dec, left=floor, right=floor)
-        # Combine increasing and decreasing portion
-        pdf_grid = pdf_interp_inc + pdf_interp_dec
+        # Fall back on histogram method
+        pdf_raw, _ = np.histogram(val, weights=weights, bins=grid, density=True)
+        bin_centers = np.convolve(grid, np.ones(2), 'valid') / 2
+        pdf_grid = np.interp(grid, bin_centers, pdf_raw, left=floor, right=floor)
         pdf_grid /= np.trapz(pdf_grid, grid)
+        #idx_inc = np.diff(val) > 0
+        #idx_dec = np.diff(val) < 0
+        #if (idx_inc[0] == True) and (idx_dec[0] == False):
+        #    # Increasing First
+        #    idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
+        #    idx_dec = np.concatenate([[np.diff(val)[0] < 0], idx_dec])
+        #if (idx_inc[0] == False) and (idx_dec[0] == True):
+        #    # Increasing Second
+        #    idx_inc = np.concatenate([[np.diff(val)[0] > 0], idx_inc])
+        #    idx_dec = np.concatenate([idx_dec, [np.diff(val)[0] > 0]])
+        #val_inc = val[idx_inc]
+        #val_dec = val[idx_dec]
+        ## Handle increasing portion
+        #pdf_raw_inc = weights[idx_inc][1:] / np.diff(val_inc)
+        #pdf_interp_inc = np.interp(grid, val_inc[1:], pdf_raw_inc, left=floor, right=floor)
+        ## Handle decreasing portion (in reverse)
+        #pdf_raw_dec = weights[idx_dec][:-1][::-1] / np.diff(val_dec[::-1])
+        #pdf_interp_dec = np.interp(grid, val_dec[:-1][::-1], pdf_raw_dec, left=floor, right=floor)
+        ## Combine increasing and decreasing portion
+        #pdf_grid = pdf_interp_inc + pdf_interp_dec
+        #pdf_grid /= np.trapz(pdf_grid, grid)
     if np.any(pdf_grid < 0):
         raise RuntimeError('Negative PDF value detected')
     # Censor the PDF is a lower/upper-limit is provided
