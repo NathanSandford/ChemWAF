@@ -38,7 +38,7 @@ yAlphaCC = 0.0026  # Alpha == Mg; Johnson & Weinberg (2020)
 yFeCC = 0.0012  # Johnson & Weinberg (2020)
 yFeIa = 0.003  # Conroy+ (2022)
 logP_floor = -50
-p0_min_logP = -100
+p0_min_logP = -200
 reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = False
@@ -93,7 +93,7 @@ fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 # Define Priors
 CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4)
 gal_priors = dict(
-    logtauSFE=GaussianLogPrior('tauSFE', 10, 1, 0, 10),
+    tauSFE=GaussianLogPrior('tauSFE', 10, 1, 0, 10),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
     fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
