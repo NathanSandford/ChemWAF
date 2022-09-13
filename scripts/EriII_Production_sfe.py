@@ -45,7 +45,7 @@ plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
 results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_sfe.npz')
-p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_sge_p0.npy')
+p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_sfe_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
