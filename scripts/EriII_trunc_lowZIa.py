@@ -28,7 +28,6 @@ IaDTD_fn = 'powerlaw'  # -1.1 Powerlaw DTD; Maoz+ (2012)
 tDminIa = 0.05  # Gyr; Citation?
 r = 0.37  # Kroupa IMF after 1 Gyr
 SolarFe = 0.0013  # Asplund (2009)
-fRetCC = fRetIa = 1.0
 # SolarAlpha = 0.0056  # Alpha == O; Asplund (2009)
 # yAlphaCC = 0.015  # Alpha == O; Chieffi & Limongi (2004), Limongi & Chieffi (2006), and Andrews+ (2017)
 # yFeCC = 0.0015  # Match to Hayden+ (2015)
@@ -36,16 +35,16 @@ fRetCC = fRetIa = 1.0
 SolarAlpha = 0.0007  # Alpha == Mg; Asplund (2009)
 yAlphaCC = 0.0026  # Alpha == Mg; Johnson & Weinberg (2020)
 yFeCC = 0.0012  # Johnson & Weinberg (2020)
-yFeIa = 0.003  # Conroy+ (2022)
+yFeIa = 0.003 * 10  # Conroy+ (2022), Johnson+ (2022)
 logP_floor = -50
 p0_min_logP = -100
 reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
-plotting = True
+plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_trunc_fret1.npz')
-p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_trunc_fret1_p0.npy')
+results_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/samples/EriII_trunc_lowZIa.npz')
+p0_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_trunc_lowZIa_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
@@ -86,8 +85,6 @@ par.update({
     'yAlphaCC': yAlphaCC,
     'yFeCC': yFeCC,
     'yFeIa': yFeIa,
-    'fRetCC': fRetCC,
-    'fRetIa': fRetIa,
 })
 fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 
@@ -98,6 +95,8 @@ gal_priors = dict(
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
     t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, 12),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
+    fRetCC=UniformLogPrior('fRetCC', 0, 1, -np.inf),
+    fRetIa=UniformLogPrior('fRetIa', 0, 1, -np.inf),
 )
 gal_par_names = list(gal_priors.keys())
 priors = {**gal_priors, **dict(latent_FeH=CaHK_FeH_Priors)}
