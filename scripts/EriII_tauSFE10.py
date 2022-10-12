@@ -38,7 +38,7 @@ yFeCC = 0.0006  #
 yFeIa = 0.0012  #
 fRet = fRetCC = fRetIa = 1.0
 logP_floor = -50
-p0_min_logP = -200
+p0_min_logP = -250
 reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = False
