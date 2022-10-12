@@ -9,7 +9,7 @@
 #SBATCH --partition=savio2
 #
 # QoS:
-#SBATCH --qos=savio2_normal
+#SBATCH --qos=dweisz_savio2_normal
 #
 # Nodes
 #SBATCH --nodes=1
