@@ -26,4 +26,4 @@
 echo "Loading modules"
 source activate /clusterfs/dweisz/nathan_sandford/.conda/envs/ChemEv
 
-python /clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/scripts/${1}.py
+python /clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/scripts/${1}
