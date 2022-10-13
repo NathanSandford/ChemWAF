@@ -44,8 +44,8 @@ reload_p0 = False  # Use previous p0 if it exists, skipping the costly initializ
 plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-results_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_Fiducial.npz')
-p0_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_Fiducial_p0.npy')
+results_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_Uniform_ttrunc.npz')
+p0_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_Uniform_ttrunc_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
