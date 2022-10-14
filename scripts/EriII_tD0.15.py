@@ -25,7 +25,7 @@ dFeH = 1e-2  # dex
 dt = 1e-5  # Gyr
 SFH_fn = 'exponential'
 IaDTD_fn = 'powerlaw'  # -1.1 Powerlaw DTD; Maoz+ (2012)
-tDminIa = 0.05  # Gyr; Citation?
+tDminIa = 0.15  # Gyr; Citation?
 r = 0.37  # Kroupa IMF after 1 Gyr
 SolarFe = 0.0013  # Asplund (2009)
 # SolarAlpha = 0.0056  # Alpha == O; Asplund (2009)
@@ -38,14 +38,14 @@ yFeCC = 0.0006  #
 yFeIa = 0.0012  #
 fRet = fRetCC = fRetIa = 1.0
 logP_floor = -50
-p0_min_logP = -600
+p0_min_logP = -100
 reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
 samp_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_samples.dat')
-results_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_logtauSFE0.4.npz')
-p0_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_logtauSFE0.4_p0.npy')
+results_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_tD0.15.npz')
+p0_file = Path('/clusterfs/dweisz/nathan_sandford/github_repos/ChemWAF/samples/EriII_tD0.15_p0.npy')
 fig_dir = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/figures')
 
 # Matplotlib defaults
@@ -93,7 +93,7 @@ fine_bins = np.arange(-10, 2.0+dFeH, dFeH)
 # Define Priors
 CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xlow=-4)
 gal_priors = dict(
-    logtauSFE=GaussianLogPrior('logtauSFE', 0.4, 0.1, 0, 1),
+    logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
     t_trunc=GaussianLogPrior('t_trunc', 1.0, 0.5, 10*dt, 12),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
