@@ -124,11 +124,11 @@ def waf2017(
                 + (1. + (tauDepSFH / tauIaSFH2) - (tauDepIa2 / tauDepSFH)) * np.exp(-delta_t / tauDepSFH)
                 - (1. + (tauDepSFH / tauIaSFH2))
         )
-        ZFeIa1[t < tDminIa] = 0
-        ZFeIa2[t < tDminIa] = 0
     else:
         RuntimeError("SFH_fn must be one of 'constant', 'exponential', or 'linexp' ")
-    Zfe = ZFeCC + ZFeIa1 + ZFeIa2
+    ZFeIa1[t < tDminIa] = 0
+    ZFeIa2[t < tDminIa] = 0
+    ZFe = ZFeCC + ZFeIa1 + ZFeIa2
     # Compute SFR
     if SFH_fn == 'constant':
         SFR = np.ones_like(t)
@@ -141,6 +141,6 @@ def waf2017(
     SFR /= np.sum(SFR)
     # Convert to [Alpha/H], [Fe/H]
     AlphaH = np.log10(ZAlpha / SolarAlpha)
-    FeH = np.log10(Zfe / SolarFe)
+    FeH = np.log10(ZFe / SolarFe)
     AlphaFe = AlphaH - FeH
     return SFR, AlphaH, FeH, AlphaFe
