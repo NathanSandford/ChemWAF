@@ -95,7 +95,7 @@ CaHK_FeH_Priors = KDELogPrior('latent_FeH', CaHK_samples.values.T, fine_bins, xl
 gal_priors = dict(
     logtauSFE=UniformLogPrior('logtauSFE', 0, 4, -np.inf),
     tauSFH=GaussianLogPrior('tauSFH', 0.7, 0.3, 0.01, np.inf),
-    t_trunc=UniformLogPrior('t_trunc', 10*dt, 5.0, -np.inf),
+    t_trunc=UniformLogPrior('t_trunc', 10*dt, 10.0, -np.inf),
     eta=UniformLogPrior('eta', 0, 1e3, -np.inf),
 )
 gal_par_names = list(gal_priors.keys())
