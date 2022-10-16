@@ -39,7 +39,7 @@ yFeIa = 0.0012  #
 fRet = fRetCC = fRetIa = 1.0
 logP_floor = -50
 p0_min_logP = -100
-reload_p0 = False  # Use previous p0 if it exists, skipping the costly initialization
+reload_p0 = True  # Use previous p0 if it exists, skipping the costly initialization
 # (set reload_p0 = False if the likelihood has changed substantially since the last run)
 plotting = False
 data_file = Path('/global/scratch/users/nathan_sandford/ChemEv/EriII/data/EriII_MDF.dat')
