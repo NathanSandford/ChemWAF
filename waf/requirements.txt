@@ -1,0 +1,9 @@
+corner>=2.2
+matplotlib>=3.4
+numpy>=1.21
+pandas>=1.3
+pocomc>=0.1
+scipy>=1.7
+setuptools>=59
+tqdm>=4.62
+
