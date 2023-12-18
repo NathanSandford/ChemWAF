@@ -44,6 +44,45 @@ def log_probability(p, default_par, priors, gal_par_names, floor=1e-10):
         return log_prob
 
 
+def log_prior_CaHKmarginalized(p_gal, priors):
+    log_pi = np.sum([priors[key](value) for key, value in p_gal.items()])
+    return log_pi
+
+
+def log_likelihood_CaHKmarginalized(p_gal, default_par, CaHK_FeH_Priors, floor=1e-10):
+    default_par.update(p_gal)
+    sfr, oh, feh, ofe = waf2017(**default_par.model_kwargs)
+    if ~np.all(np.isfinite(oh)) or ~np.all(np.isfinite(feh)) or ~np.all(np.isfinite(ofe)):
+        return -np.inf
+    feh_pdf, grid = get_PDF(
+        feh,
+        sfr,
+        grid=None,
+        lower_bound=-4,
+        upper_bound=None,
+        boundary_dist='HalfNormal',
+        boundary_width=0.35,
+        floor=floor,
+    )
+    log_like = np.sum(np.log(np.trapz(feh_pdf * CaHK_FeH_Priors.dist(grid), grid, axis=1)))
+    if np.isnan(log_like):
+        raise RuntimeError('NaN found in log_like')
+    return log_like
+
+
+def log_probability_CaHKmarginalized(p, default_par, priors, gal_par_names, floor=1e-10):
+    if p.ndim > 1:
+        raise AttributeError('log_prior is not vectorized')
+    p_gal = {par_name: p[:len(gal_par_names)][i] for i, par_name in enumerate(gal_par_names)}
+    log_pi = log_prior_CaHKmarginalized(p_gal, priors)
+    log_like = log_likelihood_CaHKmarginalized(p_gal, default_par, priors['latent_FeH'], floor)
+    log_prob = log_pi + log_like
+    if np.isnan(log_prob):
+        return -np.inf
+    else:
+        return log_prob
+
+
 def ppc(p, default_par, gal_par_names, obs_mdf, pdf_grid=None):
     if p.ndim == 1:
         p = p[np.newaxis, :]

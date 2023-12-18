@@ -39,7 +39,7 @@ def get_scripts():
     return scripts
 
 
-REQUIRED = []  # get_requirements()
+REQUIRED = get_requirements()
 SCRIPTS = get_scripts()
 EXTRAS = {}
 PACKAGES = find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"])

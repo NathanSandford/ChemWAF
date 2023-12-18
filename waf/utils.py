@@ -86,7 +86,7 @@ def get_PDF(
         #pdf_grid /= np.trapz(pdf_grid, grid)
     if np.any(pdf_grid < 0):
         raise RuntimeError('Negative PDF value detected')
-    # Censor the PDF is a lower/upper-limit is provided
+    # Censor the PDF if a lower/upper-limit is provided
     censored_pdf = censor_distribution(pdf_grid, grid, lower_bound, upper_bound, boundary_dist, boundary_width)
     return censored_pdf, grid
 
