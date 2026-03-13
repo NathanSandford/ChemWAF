@@ -28,8 +28,11 @@ class GaussianLogPrior:
         self.b = (upper_bound - mu) / sigma
         self.dist = truncnorm(a=self.a, b=self.b, loc=self.mu, scale=self.sigma)
 
-    def __call__(self, x):
-        return self.dist.logpdf(x)
+    def __call__(self, x, shared_x=False):
+        if shared_x:
+            return self.dist.logpdf(x[:, np.newaxis]).T
+        else:
+            return self.dist.logpdf(x)
 
 
 class FlatLogPrior:
